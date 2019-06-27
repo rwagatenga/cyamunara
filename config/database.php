@@ -1,11 +1,13 @@
 <?php
 
-// $DATABASE_URL = parse_url('postgres://bfwglmbheijlox:7b3e04cf0a809ed6bc3b3d3153ab57e72dff49e17d6f90b78cc1c09098d8eba9@ec2-54-204-35-248.compute-1.amazonaws.com:5432/d26lups45iukcc')\// $url = parse_url(getenv("DATABASE_URL"));
+$DATABASE_URL = parse_url('postgres://bfwglmbheijlox:7b3e04cf0a809ed6bc3b3d3153ab57e72dff49e17d6f90b78cc1c09098d8eba9@ec2-54-204-35-248.compute-1.amazonaws.com:5432/d26lups45iukcc');
 
-$host = $url["host"];
-$username = $url["user"];
-$password = $url["pass"];
-$database = substr($url["path"], 1);
+// $url = parse_url(getenv("DATABASE_URL"));
+
+// $host = $url["host"];
+// $username = $url["user"];
+// $password = $url["pass"];
+// $database = substr($url["path"], 1);
 
 return [
 
@@ -75,29 +77,29 @@ return [
         //     'sslmode' => 'prefer',
         // ],
 
-        // 'pgsql' => [
-        //     'driver' => 'pgsql',
-        //     'host' => $DATABASE_URL["host"],
-        //     'port' => $DATABASE_URL["port"],
-        //     'database' => ltrim($DATABASE_URL["path"], "/"),
-        //     'username' => $DATABASE_URL["user"],
-        //     'password' => $DATABASE_URL["pass"],
-        //     'charset' => 'utf8',
-        //     'prefix' => '',
-        //     'schema' => 'public',
-        //     'sslmode' => 'require',
-        // ],
+        'pgsql' => [
+            'driver' => 'pgsql',
+            'host' => $DATABASE_URL["host"],
+            'port' => $DATABASE_URL["port"],
+            'database' => ltrim($DATABASE_URL["path"], "/"),
+            'username' => $DATABASE_URL["user"],
+            'password' => $DATABASE_URL["pass"],
+            'charset' => 'utf8',
+            'prefix' => '',
+            'schema' => 'public',
+            'sslmode' => 'require',
+        ],
 
-                'pgsql' => array(
-        'driver'   => 'pgsql',
-        'host'     => $host,
-        'database' => $database,
-        'username' => $username,
-        'password' => $password,
-        'charset'  => 'utf8',
-        'prefix'   => '',
-        'schema'   => 'public',
-    ),
+    //             'pgsql' => array(
+    //     'driver'   => 'pgsql',
+    //     'host'     => $host,
+    //     'database' => $database,
+    //     'username' => $username,
+    //     'password' => $password,
+    //     'charset'  => 'utf8',
+    //     'prefix'   => '',
+    //     'schema'   => 'public',
+    // ),
 
         'sqlsrv' => [
             'driver' => 'sqlsrv',
