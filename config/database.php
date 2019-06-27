@@ -1,5 +1,7 @@
 <?php
 
+$DATABASE_URL = parse_url('postgres://bfwglmbheijlox:7b3e04cf0a809ed6bc3b3d3153ab57e72dff49e17d6f90b78cc1c09098d8eba9@ec2-54-204-35-248.compute-1.amazonaws.com:5432/d26lups45iukcc');
+
 return [
 
     /*
@@ -55,17 +57,29 @@ return [
             'engine' => null,
         ],
 
+        // 'pgsql' => [
+        //     'driver' => 'pgsql',
+        //     'host' => env('DB_HOST', '127.0.0.1'),
+        //     'port' => env('DB_PORT', '5432'),
+        //     'database' => env('DB_DATABASE', 'forge'),
+        //     'username' => env('DB_USERNAME', 'forge'),
+        //     'password' => env('DB_PASSWORD', ''),
+        //     'charset' => 'utf8',
+        //     'prefix' => '',
+        //     'schema' => 'public',
+        //     'sslmode' => 'prefer',
+        // ],
         'pgsql' => [
             'driver' => 'pgsql',
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'forge'),
-            'username' => env('DB_USERNAME', 'forge'),
-            'password' => env('DB_PASSWORD', ''),
+            'host' => $DATABASE_URL["ec2-54-204-35-248.compute-1.amazonaws.com"],
+            'port' => $DATABASE_URL["5432"],
+            'database' => ltrim($DATABASE_URL["cyamunara.herokuapp.com"], "/d26lups45iukcc"),
+            'username' => $DATABASE_URL["bfwglmbheijlox"],
+            'password' => $DATABASE_URL["b3e04cf0a809ed6bc3b3d3153ab57e72dff49e17d6f90b78cc1c09098d8eba9"],
             'charset' => 'utf8',
             'prefix' => '',
             'schema' => 'public',
-            'sslmode' => 'prefer',
+            'sslmode' => 'require',
         ],
 
         'sqlsrv' => [
@@ -126,3 +140,9 @@ return [
     ],
 
 ];
+// DB_CONNECTION=pgsql
+// DB_HOST=ec2-54-204-35-248.compute-1.amazonaws.com
+// DB_PORT=5432
+// DB_DATABASE=d26lups45iukcc
+// DB_USERNAME=bfwglmbheijlox
+// DB_PASSWORD=b3e04cf0a809ed6bc3b3d3153ab57e72dff49e17d6f90b78cc1c09098d8eba9
