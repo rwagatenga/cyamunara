@@ -1,7 +1,11 @@
 <?php
 
-$DATABASE_URL = parse_url('postgres://bfwglmbheijlox:7b3e04cf0a809ed6bc3b3d3153ab57e72dff49e17d6f90b78cc1c09098d8eba9@ec2-54-204-35-248.compute-1.amazonaws.com:5432/d26lups45iukcc');
+$url = parse_url(getenv("DATABASE_URL"));
 
+$host = $url["host"];
+$username = $url["user"];
+$password = $url["pass"];
+$database = substr($url["path"], 1);
 return [
 
     /*
@@ -69,18 +73,16 @@ return [
         //     'schema' => 'public',
         //     'sslmode' => 'prefer',
         // ],
-        'pgsql' => [
-            'driver' => 'pgsql',
-            'host' => $DATABASE_URL["ec2-54-204-35-248.compute-1.amazonaws.com"],
-            'port' => $DATABASE_URL["5432"],
-            'database' => ltrim($DATABASE_URL["cyamunara.herokuapp.com"], "/d26lups45iukcc"),
-            'username' => $DATABASE_URL["bfwglmbheijlox"],
-            'password' => $DATABASE_URL["b3e04cf0a809ed6bc3b3d3153ab57e72dff49e17d6f90b78cc1c09098d8eba9"],
-            'charset' => 'utf8',
-            'prefix' => '',
-            'schema' => 'public',
-            'sslmode' => 'require',
-        ],
+            'pgsql' => array(
+        'driver'   => 'pgsql',
+        'host'     => $host,
+        'database' => $database,
+        'username' => $username,
+        'password' => $password,
+        'charset'  => 'utf8',
+        'prefix'   => '',
+        'schema'   => 'public',
+    ),
 
         'sqlsrv' => [
             'driver' => 'sqlsrv',
