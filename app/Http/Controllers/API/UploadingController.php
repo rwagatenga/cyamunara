@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Crypt;
 
 //----Integrating Models---
 use App\User;
@@ -101,6 +102,9 @@ class UploadingController extends Controller
                 'first_photo' => 'required|image|max:3000|mimes:jpg,jpeg, png',
                 'other_photos*' => 'required|image|mimes:jpg,jpeg',
                 'description' => 'required',
+                'province' => 'required|min:3',
+                'district' => 'required',
+                'sector' => 'required',
             ];
             $validate = Validator::make($request->all(), $rules);
             if ($validate->fails()) {
@@ -113,6 +117,12 @@ class UploadingController extends Controller
             }
             else {
                 $cat = Product_category::where('category_name', '=', $request->category_name)->first();
+                $loc = DB::table('products')
+                    ->join('locations', 'products.location_id', '=', 'location.id')
+                    ->where('locations.province', '=', $request->province)
+                    ->where('locations.district', '=', $request->district)
+                    ->where('locations.sector', '=', $request->sector)
+                    ->get();
                 $file = $request->file('first_photo');
                 $filename = $request->first_photo->getClientOriginalName();
                 $distination = public_path().'/first_images';
@@ -123,6 +133,7 @@ class UploadingController extends Controller
                         $images->move(public_path().'/other_images', $names);
                         $datas[] = $names;
                     }
+
                 $save = new Product();
                 $save->product_name=$request->product_name;
                 $save->product_type=$request->product_type;
@@ -133,9 +144,10 @@ class UploadingController extends Controller
                 $save->other_photos=json_encode($datas);
                 $save->description=$request->description;
                 $save->status=0;
-                $save->pstatus='View';
+                $save->pstatus=0;
                 $save->category_id=$cat->id;
                 $save->user_id=$user->id;
+                $save->location_id=$loc[0]->id;
                 $save->save();
             }
         }
@@ -145,20 +157,15 @@ class UploadingController extends Controller
         $token = $request->header('Authorization');
         $user = User::where('api_token', '=', $token)->first();
         if ($user) {
-            $done = DB::table('users')
-
-            ->join('roles', 'users.role_id', '=', 'roles.id')
-            ->where('users.id', '=', $user->id)
+            $done = DB::table('products')
             ->join('users', 'products.user_id', '=', 'users.id')
+            ->where('users.id', '=', $user->id)
+            ->orWhere('users.role_id', '=', 1)
+            ->join('locations', 'products.location_id', '=', 'locations.id')
             ->orderBy('id', 'DESC')
             ->get();
+            return response()->json($done);
         }
-       $done = DB::table('users')
-        ->join('roles', 'users.role_id', '=', 'roles.id')
-        ->where('users.id', '=', 2)//$user->id)
-        ->orwhere('roles.role_name', '=', 'Admin')
-        ->(['users.first_name']);
-        return response()->json($done);
     }
 
     /**
@@ -180,11 +187,6 @@ class UploadingController extends Controller
     public function store(Request $request)
     {
         //
-        $rule = [
-            'product_name' => 'required',
-            'product_type' => 'required',
-            'product_quantity' => ''
-        ];
     }
 
     /**
@@ -193,9 +195,23 @@ class UploadingController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function ProductShow($id)
     {
         //
+        $token = $request->header('Authorization');
+        $user = User::where('api_token', '=', $token)->first();
+        if ($user) {
+            $check = Product::findOrFail($id)->first();
+             $done = DB::table('products')
+                ->join('users', 'products.user_id', '=', 'users.id')
+                ->where('users.id', '=', $user->id)
+                ->where('products.id', '=', $check->id)
+                ->orWhere('users.role_id', '=', 1)
+                ->join('locations', 'products.location_id', '=', 'locations.id')
+                ->orderBy('id', 'DESC')
+                ->get();
+                return response()->json($done);
+        }
     }
 
     /**
@@ -216,9 +232,42 @@ class UploadingController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function ProductUpdate(Request $request, $id)
     {
         //
+        $token = $request->header('Authorization');
+        $user = User::where('api_token', '=', $token)->first();
+        if ($user) {
+            $check = Product::findOrFail($id)->first();
+             $done = DB::table('products')
+                ->join('users', 'products.user_id', '=', 'users.id')
+                ->where('users.id', '=', $user->id)
+                ->where('products.id', '=', $check->id)
+                ->orWhere('users.role_id', '=', 1)
+                ->join('locations', 'products.location_id', '=', 'locations.id')
+                ->orderBy('id', 'DESC')
+                ->get();
+            $done = DB::table('products')
+                ->join('users', 'products.user_id', '=', 'users.id')
+                ->where('users.id', '=', $user->id)
+                ->where('products.id', '=', $check->id)
+                ->orWhere('users.role_id', '=', 1)
+                ->join('locations', 'products.location_id', '=', 'locations.id')
+                ->update(array(
+                    'product_name' => $request->product_name,
+                    'product_type' => $request->product_type,
+                    'product_model' => $request->product_model,
+                    'product_quantity' => $request->product_quantity,
+                    'product_price' => $request->prouduct_price,
+                    'description' => $request->description,
+                    'status' => $request->status,
+                    'pstatus' => $request->pstatus,
+                    'province' => $request->province,
+                    'district' => $request->district,
+                    'sector' => $request->sector,
+                ));
+                return response()->json($done);
+        }
     }
 
     /**
@@ -230,5 +279,15 @@ class UploadingController extends Controller
     public function destroy($id)
     {
         //
+    }
+    public function test(Request $request)
+    {
+        $request->test;
+        if ($request->test == 'hello') {
+            return response()->json($request->test);
+        }
+        else {
+            return response()->json("Wapi 2");
+        }
     }
 }

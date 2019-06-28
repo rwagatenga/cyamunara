@@ -18,18 +18,29 @@ use Illuminate\Http\Request;
 // });
 
 Route::prefix('v1')->namespace('API')->group(function () {
+  Route::post('/test', 'UploadingController@test');
+  // Home
+  Route::get('home', 'OrderingController@index');
   // Login
   Route::post('/login','RegLogController@postLogin');
   // Register
   Route::post('/register','RegLogController@postRegister');
-//---Product Display--
-  	Route::get('ProductDisplay', 'UploadingController@ProductDisplay');
+  // Show More Details
+  Route::get('/moreDetails/{id}', 'OrderingController@show');
+  // Order
+  Route::post('/order/{id}', 'OrderingController@update');
   	
   Route::middleware('APIToken')->group(function () {
   	//----Uploading Brands----
-  	Route::get('/ProductForm', 'UploadingController@ProductForm');
-  	Route::post('/ProductInsert', 'UploadingController@ProductInsert');
-
+  	Route::get('/productForm', 'UploadingController@ProductForm');
+    //-----Product Insert-----
+  	Route::post('/productInsert', 'UploadingController@ProductInsert');
+    //---Product Display----
+    Route::get('/productDisplay', 'UploadingController@ProductDisplay');
+    //---Product Edit--
+    Route::get('/productShow/{id}', 'UploadingController@ProductShow');
+    //---Product Update---
+    Route::post('/productUpdate/{id}', 'UploadingController@ProductUpdate');
   	//----Logout---
   	Route::post('/logout','RegLogController@postLogout');
   });

@@ -99,24 +99,101 @@ class RegLogController extends Controller
             return response()->json([
               'message' => $validator->messages(),
             ]);
-          } else {
+          } 
+          else {
+            $done = DB::table('users')
+
+            ->join('roles', 'users.role_id', '=', 'roles.id')
+            ->where('roles.role_name', '=', 'Admin')
+            ->orWhere('users.role_id', '=', 1)
+            ->get();
+            if ($done) {
+              return response()->json([
+                'message' => 'You are not Allowed To be Admin'
+              ]);
+            }
+              $role = DB::table('users')
+
+            ->join('roles', 'users.role_id', '=', 'roles.id')
+            ->where('roles.role_name', '=', $request->role)
+            ->get();
+
+            if ($request->role == 'Buyer' || $done[0]->role_name == 'Buyer') {
+                $save = new Location();
+                $save->province=$request->province;
+                $save->district=$request->district;
+                $save->sector=$request->sector;
+                $save->save();
+
+                $loc = DB::table('users')
+
+                ->join('locations', 'users.location_id', '=', 'location.id')
+                ->where('locations.province', '=', $request->province)
+                ->where('locations.district', '=', $request->district)
+                ->where('locations.sector', '=', $request->sector)
+                ->get();
+
+                $postArray = [
+                  'first_name' => $request->first_name,
+                  'last_name' => $request->last_name,
+                  'phone' => $request->phone,
+                  'email'     => $request->email,
+                  'password'  => bcrypt($request->password),
+                  'role_id'  => $role[0]->id,
+                  'location_id' => $loc[0]->id,
+                  'api_token' => $this->apiToken
+                ];
+                
+                
+                $user = User::insert($postArray);
+
+                $order = new Order();
+                $order->user_id=$user->id;
+                $order->product_id=0;
+                $order->location=$save->id;
+                $order->save();
+            
+                if($user) {
+                  return response()->json([
+                    'name'         => $request->first_name,
+                    'email'        => $request->email,
+                    'access_token' => $this->apiToken,
+                  ]);
+                } else {
+                  return response()->json([
+                    'message' => 'Registration failed, please try again.',
+                  ]);
+                }
+            }
+            $save = new Location();
+            $save->province=$request->province;
+            $save->district=$request->district;
+            $save->sector=$request->sector;
+            $save->save();
+
+            $loc = DB::table('users')
+
+            ->join('locations', 'users.location_id', '=', 'location.id')
+            ->where('locations.province', '=', $request->province)
+            ->where('locations.district', '=', $request->district)
+            ->where('locations.sector', '=', $request->sector)
+            ->get();
+
             $postArray = [
               'first_name' => $request->first_name,
               'last_name' => $request->last_name,
               'phone' => $request->phone,
               'email'     => $request->email,
               'password'  => bcrypt($request->password),
-              'role_id'  => $request->role,
+              'role_id'  => $role[0]->id,
+              'location_id' => $loc[0]->id,
               'api_token' => $this->apiToken
             ];
-            $save = new Location();
-            $save->province=$request->province;
-            $save->district=$request->district;
-            $save->sector=$request->sector;
+            
             
             $user = User::insert($postArray);
         
-            if($user && $save->save()) {
+            if($user) {
               return response()->json([
                 'name'         => $request->first_name,
                 'email'        => $request->email,
